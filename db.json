@@ -1,69 +1,14 @@
 {
-    "enabletermfrom": "string",
-    "enabletermto": "string",
-    "programcode": "string",
-    "remark": "string",
-    "salesGroups": [
-        {
-            "discountdetail": "string",
-            "discountfig": 0,
-            "groupname": "string",
-            "id": {
-                "groupcode": 0,
-                "programcode": "string"
-            },
-            "multiLangGroupName": "string",
-            "multilangitemcode": "string",
-            "seqno": 0,
-            "ticketTypelndex": 0,
-            "ticketTypes": [
-                {
-                    "buttonsize": "string",
-                    "discontinued": 0,
-                    "enabledayofweek": "string",
-                    "enabletermfrom": "string",
-                    "enabletermto": "string",
-                    "enabletimefrom": "string",
-                    "enabletimeto": "string",
-                    "id": {
-                        "groupcode": 0,
-                        "programcode": "string",
-                        "tickettypecode": 0
-                    },
-                    "imagefile": "string",
-                    "multiLangTicketTypeDesc": "string",
-                    "multiLangTicketTypeName": "string",
-                    "multilangitemcode": "string",
-                    "positionno": "string",
-                    "ticketTypelndex": "string",
-                    "ticketTypeltems": {
-                        "agedesc": "string",
-                        "agedivi": 0,
-                        "agename": "string",
-                        "agentcode": "string",
-                        "amount": 0,
-                        "disporder": 0,
-                        "enterCount": 0,
-                        "id": {
-                            "groupcode": 0,
-                            "programcode": "string",
-                            "tickettypecode": 0,
-                            "tickettypeitemcode": 0
-                        },
-                        "multiLangAgeDesc": "string",
-                        "multiLangAgeName": "string",
-                        "printNum": 0,
-                        "ticketTypelndex": 0,
-                        "ticketcode": "ticketcode1",
-                        "ticketname": "商品",
-                        "ticketsetdivi": 0,
-                        "unitprice": 1
-                    },
-                    "tickettypedesc": "string",
-                    "tickettypedivi": 0,
-                    "tickettypename": "string"
-                }
-            ]
-        }
-    ]
+  "posts": [
+    { "id": 1, "title": "Post 1" },
+    { "id": 2, "title": "Post 2" },
+    { "id": 3, "title": "Post 3" }
+  ],
+  "comments": [
+    { "id": 1, "body": "some comment", "postId": 1 },
+    { "id": 2, "body": "some comment", "postId": 1 }
+  ],
+  "profile": {
+    "name": "typicode"
+  }
 }

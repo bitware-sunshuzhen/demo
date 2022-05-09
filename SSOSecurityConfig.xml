@@ -1,0 +1,775 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:security="http://www.springframework.org/schema/security"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+              http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd">
+
+  <!-- Enable auto-wiring -->
+  <context:annotation-config/>
+  <context:component-scan base-package="org.springframework.security.saml"/>
+
+  <bean id="yamlProperties" class="org.springframework.beans.factory.config.YamlPropertiesFactoryBean">
+    <property name="resources" value="classpath:security/sp.yml"/>
+  </bean>
+  <context:property-placeholder properties-ref="yamlProperties"/>
+
+  <bean id="authenticationEntryPoint" class="jp.co.toppan.nv.shared.web.security.ExpiredDetectingLoginUrlAuthenticationEntryPoint">
+    <constructor-arg name="loginFormUrl" value="/login/" />
+  </bean>
+  <bean id="authorizationFilter" class="jp.co.toppan.nv.shared.web.security.AuthorizationFilter">
+  </bean>
+
+  <!-- Entry point to initialize authentication, default values taken from properties file -->
+  <bean id="samlEntryPointManabiTeacher" class="org.springframework.security.saml.SAMLEntryPoint">
+    <property name="defaultProfileOptions">
+      <bean class="org.springframework.security.saml.websso.WebSSOProfileOptions">
+        <property name="includeScoping" value="false"/>
+        <property name="providerName" value="SAML_Test_SP_ManabiTeacher"/>
+        <property name="forceAuthN" value="false"/>
+        <property name="relayState" value="test"/>
+      </bean>
+    </property>
+    <property name="filterProcessesUrl" value="/saml/login/alias/${sp.manabi.teacher.alias}"/>
+    <property name="samlDiscovery" ref="samlIDPDiscoveryManabiTeacher"/>
+    <property name="contextProvider" ref="contextProviderManabiTeacher"/>
+  </bean>
+
+  <bean id="samlEntryPointSuiteTeacher" class="org.springframework.security.saml.SAMLEntryPoint">
+    <property name="defaultProfileOptions">
+      <bean class="org.springframework.security.saml.websso.WebSSOProfileOptions">
+        <property name="includeScoping" value="false"/>
+        <property name="providerName" value="SAML_Test_SP_SuiteTeacher"/>
+        <property name="forceAuthN" value="false"/>
+        <property name="relayState" value="test"/>
+      </bean>
+    </property>
+    <property name="filterProcessesUrl" value="/saml/login/alias/${sp.suite.teacher.alias}"/>
+    <property name="samlDiscovery" ref="samlIDPDiscoverySuiteTeacher"/>
+    <property name="contextProvider" ref="contextProviderSuiteTeacher"/>
+  </bean>
+
+  <bean id="samlEntryPointManabiStudent" class="org.springframework.security.saml.SAMLEntryPoint">
+    <property name="defaultProfileOptions">
+      <bean class="org.springframework.security.saml.websso.WebSSOProfileOptions">
+        <property name="includeScoping" value="false"/>
+        <property name="providerName" value="SAML_Test_SP_ManabiStudent"/>
+        <property name="forceAuthN" value="false"/>
+        <property name="relayState" value="test"/>
+      </bean>
+    </property>
+    <property name="filterProcessesUrl" value="/saml/login/alias/${sp.manabi.student.alias}"/>
+    <property name="samlDiscovery" ref="samlIDPDiscoveryManabiStudent"/>
+    <property name="contextProvider" ref="contextProviderManabiStudent"/>
+  </bean>
+  <bean id="samlEntryPointSuiteStudent" class="org.springframework.security.saml.SAMLEntryPoint">
+    <property name="defaultProfileOptions">
+      <bean class="org.springframework.security.saml.websso.WebSSOProfileOptions">
+        <property name="includeScoping" value="false"/>
+        <property name="providerName" value="SAML_Test_SP_SuiteStudent"/>
+        <property name="forceAuthN" value="false"/>
+        <property name="relayState" value="test"/>
+      </bean>
+    </property>
+    <property name="filterProcessesUrl" value="/saml/login/alias/${sp.suite.student.alias}"/>
+    <property name="samlDiscovery" ref="samlIDPDiscoverySuiteStudent"/>
+    <property name="contextProvider" ref="contextProviderSuiteStudent"/>
+  </bean>
+
+  <bean id="samlIDPDiscoveryManabiTeacher" class="org.springframework.security.saml.SAMLDiscovery">
+    <property name="contextProvider" ref="contextProviderManabiTeacher"/>
+    <property name="samlEntryPoint" ref="samlEntryPointManabiTeacher"/>
+    <property name="filterProcessesUrl" value="/saml/discovery/alias/${sp.manabi.teacher.alias}"/>
+    <property name="idpSelectionPath" value="${sp.manabi.idpSelectionPath}"/>
+  </bean>
+  <bean id="samlIDPDiscoverySuiteTeacher" class="org.springframework.security.saml.SAMLDiscovery">
+    <property name="contextProvider" ref="contextProviderSuiteTeacher"/>
+    <property name="samlEntryPoint" ref="samlEntryPointSuiteTeacher"/>
+    <property name="filterProcessesUrl" value="/saml/discovery/alias/${sp.suite.teacher.alias}"/>
+  </bean>
+  <bean id="samlIDPDiscoveryManabiStudent" class="org.springframework.security.saml.SAMLDiscovery">
+    <property name="contextProvider" ref="contextProviderManabiStudent"/>
+    <property name="samlEntryPoint" ref="samlEntryPointManabiStudent"/>
+    <property name="filterProcessesUrl" value="/saml/discovery/alias/${sp.manabi.student.alias}"/>
+    <property name="idpSelectionPath" value="${sp.manabi.idpSelectionPath}"/>
+  </bean>
+  <bean id="samlIDPDiscoverySuiteStudent" class="org.springframework.security.saml.SAMLDiscovery">
+  	<property name="contextProvider" ref="contextProviderSuiteStudent"/>
+  	<property name="samlEntryPoint" ref="samlEntryPointSuiteStudent"/>
+  	<property name="filterProcessesUrl" value="/saml/discovery/alias/${sp.suite.student.alias}"/>
+  </bean>
+
+  <bean id="metadataGeneratorFilterManabiTeacher"
+        class="org.springframework.security.saml.metadata.MetadataGeneratorFilter">
+    <constructor-arg>
+      <bean class="org.springframework.security.saml.metadata.MetadataGenerator">
+        <property name="entityId" value="${sp.manabi.teacher.entityId}"/>
+        <property name="entityBaseURL" value="${sp.admin.entityBaseURL}"/>
+<!--        <property name="assertionConsumerIndex" value="1"/>-->
+        <property name="keyManager" ref ="keyManagerManabiTeacher"/>
+        <property name="samlLogoutProcessingFilter" ref="samlLogoutProcessingFilterManabiTeacher"/>
+        <property name="includeDiscoveryExtension" value ="${sp.includeDiscoveryExtension}"/>
+        <property name="requestSigned" value ="${sp.manabi.requestSigned}"/>
+        <property name="wantAssertionSigned" value ="${sp.wantAssertionSigned}"/>
+        <property name="samlEntryPoint" ref="samlEntryPointManabiTeacher"/>
+        <property name="extendedMetadata">
+          <bean class="org.springframework.security.saml.metadata.ExtendedMetadata">
+            <property name="signMetadata" value="${sp.signMetadata}"/>
+            <property name="alias" value="${sp.manabi.teacher.alias}"/>
+            <property name="idpDiscoveryEnabled" value="${sp.manabi.idpDiscoveryEnabled}"/>
+            <property name="idpDiscoveryURL" value="${idp.manabi.admin.idpDiscoveryURL}"/>
+            <property name="idpDiscoveryResponseURL" value="${sp.manabi.admin.idpDiscoveryResponseURL}"/>
+           </bean>
+        </property>
+      </bean>
+    </constructor-arg>
+    <property name="displayFilter" ref="metadataDisplayFilterManabiTeacher"/>
+    <property name="manager" ref="metadata"/>
+  </bean>
+  <bean id="metadataGeneratorFilterManabiStudent"
+        class="org.springframework.security.saml.metadata.MetadataGeneratorFilter">
+    <constructor-arg>
+      <bean class="org.springframework.security.saml.metadata.MetadataGenerator">
+        <property name="entityId" value="${sp.manabi.student.entityId}"/>
+        <property name="entityBaseURL" value="${sp.portal.entityBaseURL}"/>
+        <!--        <property name="assertionConsumerIndex" value="1"/>-->
+        <property name="keyManager" ref ="keyManagerManabiStudent"/>
+        <property name="samlLogoutProcessingFilter" ref="samlLogoutProcessingFilterManabiStudent"/>
+        <property name="includeDiscoveryExtension" value ="${sp.includeDiscoveryExtension}"/>
+        <property name="requestSigned" value ="${sp.manabi.requestSigned}"/>
+        <property name="wantAssertionSigned" value ="${sp.wantAssertionSigned}"/>
+        <property name="samlEntryPoint" ref="samlEntryPointManabiStudent"/>
+        <property name="extendedMetadata">
+          <bean class="org.springframework.security.saml.metadata.ExtendedMetadata">
+            <property name="signMetadata" value="${sp.signMetadata}"/>
+            <property name="alias" value="${sp.manabi.student.alias}"/>
+            <property name="idpDiscoveryEnabled" value="${sp.manabi.idpDiscoveryEnabled}"/>
+            <property name="idpDiscoveryURL" value="${idp.manabi.portal.idpDiscoveryURL}"/>
+            <property name="idpDiscoveryResponseURL" value="${sp.manabi.portal.idpDiscoveryResponseURL}"/>
+          </bean>
+        </property>
+      </bean>
+    </constructor-arg>
+    <property name="displayFilter" ref="metadataDisplayFilterManabiStudent"/>
+    <property name="manager" ref="metadataManabiStudent"/>
+  </bean>
+  <bean id="metadataGeneratorFilterSuiteTeacher"
+        class="org.springframework.security.saml.metadata.MetadataGeneratorFilter">
+    <constructor-arg>
+      <bean class="org.springframework.security.saml.metadata.MetadataGenerator">
+        <property name="entityId" value="${sp.suite.teacher.entityId}"/>
+        <property name="entityBaseURL" value="${sp.admin.entityBaseURL}"/>
+        <!--        <property name="assertionConsumerIndex" value="1"/>-->
+        <property name="keyManager" ref ="keyManagerSuiteTeacher"/>
+        <property name="samlLogoutProcessingFilter" ref="samlLogoutProcessingFilterSuiteTeacher"/>
+        <property name="includeDiscoveryExtension" value ="${sp.includeDiscoveryExtension}"/>
+        <property name="requestSigned" value ="${sp.suite.requestSigned}"/>
+        <property name="wantAssertionSigned" value ="${sp.wantAssertionSigned}"/>
+        <property name="samlEntryPoint" ref="samlEntryPointSuiteTeacher"/>
+        <property name="extendedMetadata">
+          <bean class="org.springframework.security.saml.metadata.ExtendedMetadata">
+            <property name="signMetadata" value="${sp.signMetadata}"/>
+            <property name="alias" value="${sp.suite.teacher.alias}"/>
+            <property name="idpDiscoveryEnabled" value="${sp.suite.idpDiscoveryEnabled}"/>
+            <property name="idpDiscoveryResponseURL" value="${sp.suite.admin.idpDiscoveryResponseURL}"/>
+          </bean>
+        </property>
+      </bean>
+    </constructor-arg>
+    <property name="displayFilter" ref="metadataDisplayFilterSuiteTeacher"/>
+    <property name="manager" ref="metadataSuiteTeacher"/>
+  </bean>
+  <bean id="metadataGeneratorFilterSuiteStudent"
+        class="org.springframework.security.saml.metadata.MetadataGeneratorFilter">
+    <constructor-arg>
+      <bean class="org.springframework.security.saml.metadata.MetadataGenerator">
+        <property name="entityId" value="${sp.suite.student.entityId}"/>
+        <property name="entityBaseURL" value="${sp.portal.entityBaseURL}"/>
+        <!--        <property name="assertionConsumerIndex" value="1"/>-->
+        <property name="keyManager" ref ="keyManagerSuiteStudent"/>
+        <property name="samlLogoutProcessingFilter" ref="samlLogoutProcessingFilterSuiteStudent"/>
+        <property name="includeDiscoveryExtension" value ="${sp.includeDiscoveryExtension}"/>
+        <property name="requestSigned" value ="${sp.suite.requestSigned}"/>
+        <property name="wantAssertionSigned" value ="${sp.wantAssertionSigned}"/>
+        <property name="samlEntryPoint" ref="samlEntryPointSuiteStudent"/>
+        <property name="extendedMetadata">
+          <bean class="org.springframework.security.saml.metadata.ExtendedMetadata">
+            <property name="signMetadata" value="${sp.signMetadata}"/>
+            <property name="alias" value="${sp.suite.student.alias}"/>
+            <property name="idpDiscoveryEnabled" value="${sp.suite.idpDiscoveryEnabled}"/>
+            <property name="idpDiscoveryResponseURL" value="${sp.suite.portal.idpDiscoveryResponseURL}"/>
+          </bean>
+        </property>
+      </bean>
+    </constructor-arg>
+    <property name="displayFilter" ref="metadataDisplayFilterSuiteStudent"/>
+    <property name="manager" ref="metadataSuiteStudent"/>
+  </bean>
+
+  <bean id="keyManagerTls" class="org.springframework.security.saml.key.JKSKeyManager">
+    <constructor-arg value="classpath:security/${idp.tls.jks.keystore}"/>
+    <constructor-arg type="java.lang.String" value="${idp.tls.jks.pass}"/>
+    <constructor-arg>
+      <map>
+        <entry key="${idp.tls.jks.key}" value="${idp.tls.jks.pass}"/>
+      </map>
+    </constructor-arg>
+    <constructor-arg type="java.lang.String" value="${idp.tls.jks.key}"/>
+  </bean>
+
+  <bean id="keyManagerManabiTeacher" class="org.springframework.security.saml.key.JKSKeyManager">
+      <constructor-arg value="classpath:security/manabiKeyStore.jks"/>
+      <constructor-arg type="java.lang.String" value="${sp.manabi.jks.pass}"/>
+      <constructor-arg>
+        <map>
+          <entry key="${sp.manabi.jks.key}" value="${sp.manabi.jks.pass}"/>
+        </map>
+      </constructor-arg>
+      <constructor-arg type="java.lang.String" value="${sp.manabi.jks.key}"/>
+  </bean>
+  <bean id="keyManagerManabiStudent" class="org.springframework.security.saml.key.JKSKeyManager">
+      <constructor-arg value="classpath:security/manabiKeyStore.jks"/>
+      <constructor-arg type="java.lang.String" value="${sp.manabi.jks.pass}"/>
+      <constructor-arg>
+        <map>
+          <entry key="${sp.manabi.jks.key}" value="${sp.manabi.jks.pass}"/>
+        </map>
+      </constructor-arg>
+      <constructor-arg type="java.lang.String" value="${sp.manabi.jks.key}"/>
+  </bean>
+  <bean id="keyManagerSuiteTeacher" class="org.springframework.security.saml.key.JKSKeyManager">
+    <constructor-arg value="classpath:security/suiteKeyStore.jks"/>
+    <constructor-arg type="java.lang.String" value="${sp.suite.jks.pass}"/>
+    <constructor-arg>
+      <map>
+        <entry key="${sp.suite.jks.key}" value="${sp.suite.jks.pass}"/>
+      </map>
+    </constructor-arg>
+    <constructor-arg type="java.lang.String" value="${sp.suite.jks.key}"/>
+  </bean>
+  <bean id="keyManagerSuiteStudent" class="org.springframework.security.saml.key.JKSKeyManager">
+    <constructor-arg value="classpath:security/suiteKeyStore.jks"/>
+    <constructor-arg type="java.lang.String" value="${sp.suite.jks.pass}"/>
+    <constructor-arg>
+      <map>
+        <entry key="${sp.suite.jks.key}" value="${sp.suite.jks.pass}"/>
+      </map>
+    </constructor-arg>
+    <constructor-arg type="java.lang.String" value="${sp.suite.jks.key}"/>
+  </bean>
+
+  <bean id="samlFilterManabiTeacher" class="org.springframework.security.web.FilterChainProxy">
+    <security:filter-chain-map  request-matcher="ant">
+      <security:filter-chain pattern="/saml/login/alias/${sp.manabi.teacher.alias}/**" filters="samlEntryPointManabiTeacher"/>
+      <security:filter-chain pattern="/saml/SSO/alias/${sp.manabi.teacher.alias}/**" filters="samlWebSSOProcessingFilterManabiTeacher"/>
+      <security:filter-chain pattern="/saml/metadata/alias/${sp.manabi.teacher.alias}/**" filters="metadataDisplayFilterManabiTeacher"/>
+      <security:filter-chain pattern="/saml/SingleLogout/alias/${sp.manabi.teacher.alias}/**" filters="samlLogoutProcessingFilterManabiTeacher"/>
+<!--      <security:filter-chain pattern="/saml/discovery/alias/${sp.manabi.teacher.alias}/**" filters="samlIDPDiscoveryManabiTeacher"/>-->
+    </security:filter-chain-map>
+  </bean>
+  <bean id="samlFilterSuiteTeacher" class="org.springframework.security.web.FilterChainProxy">
+    <security:filter-chain-map  request-matcher="ant">
+      <security:filter-chain pattern="/saml/login/alias/${sp.suite.teacher.alias}/**" filters="samlEntryPointSuiteTeacher"/>
+      <security:filter-chain pattern="/saml/SSO/alias/${sp.suite.teacher.alias}/**" filters="samlWebSSOProcessingFilterSuiteTeacher"/>
+      <security:filter-chain pattern="/saml/metadata/alias/${sp.suite.teacher.alias}/**" filters="metadataDisplayFilterSuiteTeacher"/>
+      <security:filter-chain pattern="/saml/SingleLogout/alias/${sp.suite.teacher.alias}/**" filters="samlLogoutProcessingFilterSuiteTeacher"/>
+      <!--      <security:filter-chain pattern="/saml/discovery/alias/${sp.suite.teacher.alias}/**" filters="samlIDPDiscoverySuiteTeacher"/>-->
+    </security:filter-chain-map>
+  </bean>
+
+  <bean id="samlFilterManabiStudent" class="org.springframework.security.web.FilterChainProxy">
+    <security:filter-chain-map  request-matcher="ant">
+      <security:filter-chain pattern="/saml/login/alias/${sp.manabi.student.alias}/**" filters="samlEntryPointManabiStudent"/>
+      <security:filter-chain pattern="/saml/SSO/alias/${sp.manabi.student.alias}/**" filters="samlWebSSOProcessingFilterManabiStudent"/>
+      <security:filter-chain pattern="/saml/metadata/alias/${sp.manabi.student.alias}/**" filters="metadataDisplayFilterManabiStudent"/>
+      <security:filter-chain pattern="/saml/SingleLogout/alias/${sp.manabi.student.alias}/**" filters="samlLogoutProcessingFilterManabiStudent"/>
+<!--      <security:filter-chain pattern="/saml/discovery/**" filters="samlIDPDiscoveryManabiTeacher"/>-->
+    </security:filter-chain-map>
+  </bean>
+  <bean id="samlFilterSuiteStudent" class="org.springframework.security.web.FilterChainProxy">
+    <security:filter-chain-map  request-matcher="ant">
+      <security:filter-chain pattern="/saml/login/alias/${sp.suite.student.alias}/**" filters="samlEntryPointSuiteStudent"/>
+      <security:filter-chain pattern="/saml/SSO/alias/${sp.suite.student.alias}/**" filters="samlWebSSOProcessingFilterSuiteStudent"/>
+      <security:filter-chain pattern="/saml/metadata/alias/${sp.suite.student.alias}/**" filters="metadataDisplayFilterSuiteStudent"/>
+      <security:filter-chain pattern="/saml/SingleLogout/alias/${sp.suite.student.alias}/**" filters="samlLogoutProcessingFilterSuiteStudent"/>
+      <!--      <security:filter-chain pattern="/saml/discovery/**" filters="samlIDPDiscoveryManabiTeacher"/>-->
+    </security:filter-chain-map>
+  </bean>
+
+  <!-- The filter is waiting for connections on URL suffixed with filterSuffix and presents SP metadata there -->
+  <bean id="metadataDisplayFilterManabiTeacher" class="org.springframework.security.saml.metadata.MetadataDisplayFilter">
+    <property name="contextProvider" ref="contextProviderManabiTeacher"/>
+    <property name="keyManager" ref="keyManagerManabiTeacher"/>
+    <property name="manager" ref="metadata"/>
+    <property name="filterProcessesUrl" value="/saml/metadata/alias/${sp.manabi.teacher.alias}"/>
+  </bean>
+  <bean id="metadataDisplayFilterSuiteTeacher" class="org.springframework.security.saml.metadata.MetadataDisplayFilter">
+    <property name="contextProvider" ref="contextProviderSuiteTeacher"/>
+    <property name="keyManager" ref="keyManagerSuiteTeacher"/>
+    <property name="manager" ref="metadataSuiteTeacher"/>
+    <property name="filterProcessesUrl" value="/saml/metadata/alias/${sp.suite.teacher.alias}"/>
+  </bean>
+  <bean id="metadataDisplayFilterManabiStudent" class="org.springframework.security.saml.metadata.MetadataDisplayFilter">
+    <property name="contextProvider" ref="contextProviderManabiStudent"/>
+    <property name="keyManager" ref="keyManagerManabiTeacher"/>
+    <property name="manager" ref="metadataManabiStudent"/>
+    <property name="filterProcessesUrl" value="/saml/metadata/alias/${sp.manabi.student.alias}"/>
+  </bean>
+  <bean id="metadataDisplayFilterSuiteStudent" class="org.springframework.security.saml.metadata.MetadataDisplayFilter">
+    <property name="contextProvider" ref="contextProviderSuiteStudent"/>
+    <property name="keyManager" ref="keyManagerSuiteStudent"/>
+    <property name="manager" ref="metadataSuiteStudent"/>
+    <property name="filterProcessesUrl" value="/saml/metadata/alias/${sp.suite.student.alias}"/>
+  </bean>
+
+  <!-- Processing filter for WebSSO profile messages -->
+  <bean id="samlWebSSOProcessingFilterManabiTeacher" class="org.springframework.security.saml.SAMLProcessingFilter">
+    <property name="contextProvider" ref="contextProviderManabiTeacher"/>
+    <property name="authenticationManager" ref="authenticationManager"/>
+    <property name="authenticationSuccessHandler" ref="successRedirectHandler"/>
+    <property name="authenticationFailureHandler" ref="failureSsoRedirectHandler"/>
+  </bean>
+  <bean id="samlWebSSOProcessingFilterSuiteTeacher" class="org.springframework.security.saml.SAMLProcessingFilter">
+    <property name="contextProvider" ref="contextProviderSuiteTeacher"/>
+    <property name="authenticationManager" ref="authenticationManager"/>
+    <property name="authenticationSuccessHandler" ref="successRedirectHandler"/>
+    <property name="authenticationFailureHandler" ref="failureSsoRedirectHandler"/>
+  </bean>
+  <bean id="samlWebSSOProcessingFilterManabiStudent" class="org.springframework.security.saml.SAMLProcessingFilter">
+    <property name="contextProvider" ref="contextProviderManabiStudent"/>
+    <property name="authenticationManager" ref="authenticationManager"/>
+    <property name="authenticationSuccessHandler" ref="successRedirectHandler"/>
+    <property name="authenticationFailureHandler" ref="failureSsoRedirectHandler"/>
+  </bean>
+  <bean id="samlWebSSOProcessingFilterSuiteStudent" class="org.springframework.security.saml.SAMLProcessingFilter">
+    <property name="contextProvider" ref="contextProviderSuiteStudent"/>
+    <property name="authenticationManager" ref="authenticationManager"/>
+    <property name="authenticationSuccessHandler" ref="successRedirectHandler"/>
+    <property name="authenticationFailureHandler" ref="failureSsoRedirectHandler"/>
+  </bean>
+  <!-- Handler deciding where to redirect user after successful login -->
+  <bean id="successRedirectHandler" class="org.springframework.security.web.authentication.ForwardAuthenticationSuccessHandler">
+    <constructor-arg value="/login_success/"/>
+  </bean>
+  <!-- Handler deciding where to redirect user after failed login -->
+  <bean id="failureRedirectHandler" class="org.springframework.security.web.authentication.ForwardAuthenticationFailureHandler">
+    <constructor-arg value="/login_fail/"/>
+  </bean>
+  <bean id="failureSsoRedirectHandler" class="jp.co.toppan.nv.shared.web.security.SamlAuthenticationFailueHandler">
+  	<constructor-arg value="/login_fail_401/"/>
+  </bean>
+
+  <!-- Filter processing incoming logout messages -->
+  <!-- First argument determines URL user will be redirected to after successful global logout -->
+  <bean id="samlLogoutProcessingFilterManabiTeacher" class="jp.co.toppan.nv.shared.web.security.UserSAMLLogoutProcessingFilter">
+    <property name="contextProvider" ref="contextProviderManabiTeacher"/>
+    <constructor-arg index="0" ref="successLogoutHandler"/>
+    <constructor-arg index="1" ref="localLogoutHandler"/>
+  </bean>
+  <bean id="samlLogoutProcessingFilterManabiStudent" class="jp.co.toppan.nv.shared.web.security.UserSAMLLogoutProcessingFilter">
+    <property name="contextProvider" ref="contextProviderManabiStudent"/>
+    <constructor-arg index="0" ref="successLogoutHandler"/>
+    <constructor-arg index="1" ref="localLogoutHandler"/>
+  </bean>
+  <bean id="samlLogoutProcessingFilterSuiteTeacher" class="jp.co.toppan.nv.shared.web.security.UserSAMLLogoutProcessingFilter">
+    <property name="contextProvider" ref="contextProviderSuiteTeacher"/>
+    <constructor-arg index="0" ref="successLogoutHandler"/>
+    <constructor-arg index="1" ref="localLogoutHandler"/>
+  </bean>
+  <bean id="samlLogoutProcessingFilterSuiteStudent" class="jp.co.toppan.nv.shared.web.security.UserSAMLLogoutProcessingFilter">
+    <property name="contextProvider" ref="contextProviderSuiteStudent"/>
+    <constructor-arg index="0" ref="successLogoutHandler"/>
+    <constructor-arg index="1" ref="localLogoutHandler"/>
+  </bean>
+  <!-- Override default logout processing filter with the one processing SAML messages -->
+  <bean id="samlLogoutFilter" class="org.springframework.security.saml.SAMLLogoutFilter">
+    <property name="contextProvider" ref="contextProviderManabiTeacher"/>
+    <constructor-arg index="0" ref="successLogoutHandler"/>
+    <constructor-arg index="1" ref="localLogoutHandler"/>
+    <constructor-arg index="2" ref="globalLogoutHandler"/>
+  </bean>
+  <!-- Handler for successful logout -->
+  <bean id="successLogoutHandler" class="org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler">
+    <property name="defaultTargetUrl" value="/login/"/>
+  </bean>
+  <!-- Logout handler terminating local session -->
+  <bean id="localLogoutHandler" class="jp.co.toppan.nv.shared.web.security.LocalLogoutHandler">
+  </bean>
+  <bean id="globalLogoutHandler"
+        class="org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler">
+    <property name="invalidateHttpSession" value="true"/>
+  </bean>
+
+  <bean id="tls" class="org.springframework.security.saml.trust.httpclient.TLSProtocolConfigurer">
+    <property name="keyManager" ref="keyManagerTls"></property>
+    <property name="sslHostnameVerification" value="allowAll"></property>
+    <property name="trustedKeys">
+    	<set><value>${sp.manabi.tls}</value><value>${sp.suite.tls}</value></set>
+    </property>
+  </bean>
+
+  <bean id="metadata" class="org.springframework.security.saml.metadata.CachingMetadataManager">
+    <constructor-arg>
+      <list>
+        <bean class="org.springframework.security.saml.metadata.ExtendedMetadataDelegate">
+          <constructor-arg>
+            <bean class="org.opensaml.saml2.metadata.provider.HTTPMetadataProvider">
+              <constructor-arg>
+                <value type="java.lang.String">${idp.manabi.metadataURL}</value>
+              </constructor-arg>
+              <constructor-arg>
+                <value type="int">30000</value>
+              </constructor-arg>
+              <property name="parserPool" ref="parserPool"/>
+              <property name="minRefreshDelay" value="120000"/>
+              <property name="maxRefreshDelay" value="600000"/>
+            </bean>
+          </constructor-arg>
+          <constructor-arg>
+            <bean class="org.springframework.security.saml.metadata.ExtendedMetadata">
+              <property name="signMetadata" value="${sp.signMetadata}"/>
+              <property name="signingKey" value="${sp.manabi.signingKey}"/>
+              <property name="trustedKeys">
+              	<set><value>${sp.manabi.keyValue}</value></set>
+              </property>
+            </bean>
+          </constructor-arg>
+          <property name="metadataTrustCheck" value="${sp.manabi.metadataTrustCheck}"/>
+          <property name="metadataRequireSignature" value="false"/>
+        </bean>
+      </list>
+    </constructor-arg>
+    <property name="keyManager" ref="keyManagerManabiTeacher"/>
+  </bean>
+
+  <bean id="metadataManabiStudent" class="org.springframework.security.saml.metadata.CachingMetadataManager">
+    <constructor-arg>
+      <list>
+        <bean class="org.springframework.security.saml.metadata.ExtendedMetadataDelegate">
+          <constructor-arg>
+            <bean class="org.opensaml.saml2.metadata.provider.HTTPMetadataProvider">
+              <constructor-arg>
+                <value type="java.lang.String">${idp.manabi.metadataURL}</value>
+              </constructor-arg>
+              <constructor-arg>
+                <value type="int">30000</value>
+              </constructor-arg>
+              <property name="parserPool" ref="parserPool"/>
+              <property name="minRefreshDelay" value="120000"/>
+              <property name="maxRefreshDelay" value="600000"/>
+            </bean>
+          </constructor-arg>
+          <constructor-arg>
+            <bean class="org.springframework.security.saml.metadata.ExtendedMetadata">
+              <property name="signMetadata" value="${sp.signMetadata}"/>
+              <property name="signingKey" value="${sp.manabi.signingKey}"/>
+              <property name="trustedKeys">
+              	<set><value>${sp.manabi.keyValue}</value></set>
+              </property>
+            </bean>
+          </constructor-arg>
+          <property name="metadataTrustCheck" value="${sp.manabi.metadataTrustCheck}"/>
+          <property name="metadataRequireSignature" value="false"/>
+        </bean>
+      </list>
+    </constructor-arg>
+    <property name="keyManager" ref="keyManagerManabiStudent"/>
+  </bean>
+
+  <bean id="metadataSuiteTeacher" class="org.springframework.security.saml.metadata.CachingMetadataManager">
+    <constructor-arg>
+      <list>
+        <bean class="org.springframework.security.saml.metadata.ExtendedMetadataDelegate">
+          <constructor-arg>
+            <bean class="org.opensaml.saml2.metadata.provider.ResourceBackedMetadataProvider">
+              <constructor-arg>
+                <bean class="java.util.Timer"/>
+              </constructor-arg>
+              <constructor-arg>
+                <bean class="org.opensaml.util.resource.ClasspathResource">
+                	<constructor-arg value="/security/suite-teacher-idp.xml"/>
+                </bean>
+              </constructor-arg>
+              <property name="parserPool" ref="parserPool"/>
+            </bean>
+          </constructor-arg>
+          <constructor-arg>
+            <bean class="org.springframework.security.saml.metadata.ExtendedMetadata">
+              <property name="idpDiscoveryURL" value="${idp.suite.dev.admin.idpDiscoveryURL}"/>
+              <property name="idpDiscoveryResponseURL" value="${sp.suite.teacher.idpDiscoveryResponseURL}"/>
+            </bean>
+          </constructor-arg>
+          <property name="metadataTrustCheck" value="${sp.suite.metadataTrustCheck}"/>
+          <property name="metadataRequireSignature" value="false"/>
+        </bean>
+      </list>
+    </constructor-arg>
+    <property name="defaultIDP" value="${idp.suite.dev.admin.entityId}"/>
+    <property name="keyManager" ref="keyManagerSuiteTeacher"/>
+  </bean>
+  <bean id="metadataSuiteStudent" class="org.springframework.security.saml.metadata.CachingMetadataManager">
+    <constructor-arg>
+      <list>
+        <bean class="org.springframework.security.saml.metadata.ExtendedMetadataDelegate">
+          <constructor-arg>
+            <bean class="org.opensaml.saml2.metadata.provider.ResourceBackedMetadataProvider">
+              <constructor-arg>
+                <bean class="java.util.Timer"/>
+              </constructor-arg>
+              <constructor-arg>
+                <bean class="org.opensaml.util.resource.ClasspathResource">
+                	<constructor-arg value="/security/suite-student-idp.xml"/>
+                </bean>
+              </constructor-arg>
+              <property name="parserPool" ref="parserPool"/>
+            </bean>
+          </constructor-arg>
+          <constructor-arg>
+            <bean class="org.springframework.security.saml.metadata.ExtendedMetadata">
+              <property name="signMetadata" value="${sp.signMetadata}"/>
+              <property name="signingKey" value="${sp.suite.signingKey}"/>
+              <property name="idpDiscoveryURL" value="${idp.suite.dev.portal.idpDiscoveryURL}"/>
+              <property name="idpDiscoveryResponseURL" value="${sp.suite.student.idpDiscoveryResponseURL}"/>
+            </bean>
+          </constructor-arg>
+          <property name="metadataTrustCheck" value="${sp.suite.metadataTrustCheck}"/>
+          <property name="metadataRequireSignature" value="false"/>
+        </bean>
+      </list>
+    </constructor-arg>
+    <property name="defaultIDP" value="${idp.suite.dev.portal.entityId}"/>
+    <property name="keyManager" ref="keyManagerSuiteStudent"/>
+  </bean>
+
+  <!-- Initialization of OpenSAML library-->
+  <bean class="org.springframework.security.saml.SAMLBootstrap"/>
+  <!-- Logger for SAML messages and events -->
+<!--  <bean id="samlLogger" class="org.springframework.security.saml.log.SAMLDefaultLogger"/>-->
+  <bean id="samlLogger" class="org.springframework.security.saml.log.SAMLDefaultLogger">
+    <property name="logErrors" value="true"/>
+  </bean>
+  <!-- SAML 2.0 WebSSO Assertion Consumer -->
+  <bean id="webSSOprofileConsumer" class="org.springframework.security.saml.websso.WebSSOProfileConsumerImpl">
+    <property name="maxAuthenticationAge" value="2592000"></property>
+  </bean>
+
+  <!-- SAML 2.0 Holder-of-Key WebSSO Assertion Consumer -->
+  <bean id="hokWebSSOprofileConsumer" class="org.springframework.security.saml.websso.WebSSOProfileConsumerHoKImpl"/>
+
+  <!-- SAML 2.0 Web SSO profile -->
+  <bean id="webSSOprofile" class="org.springframework.security.saml.websso.WebSSOProfileImpl"/>
+
+  <!-- SAML 2.0 Holder-of-Key Web SSO profile -->
+  <bean id="hokWebSSOProfile" class="org.springframework.security.saml.websso.WebSSOProfileConsumerHoKImpl"/>
+
+  <!-- SAML 2.0 ECP profile -->
+  <bean id="ecpprofile" class="org.springframework.security.saml.websso.WebSSOProfileECPImpl"/>
+
+  <!-- SAML 2.0 Logout Profile -->
+  <bean id="logoutprofile" class="org.springframework.security.saml.websso.SingleLogoutProfileImpl">
+<!--    <property name="metadata" ref="metadata"></property>-->
+  </bean>
+
+  <!-- Initialization of the velocity engine -->
+  <bean id="velocityEngine" class="org.springframework.security.saml.util.VelocityFactory" factory-method="getEngine"/>
+
+  <bean id="parserPool" class="org.opensaml.xml.parse.StaticBasicParserPool" init-method="initialize"/>
+  <bean id="parserPoolHolder" class="org.springframework.security.saml.parser.ParserPoolHolder"/>
+
+  <bean id="userDetailService" class="jp.co.toppan.nv.shared.web.security.UserDetailsAuthenticationProvider"/>
+  <bean id="samlUserDetailService" class="jp.co.toppan.nv.shared.web.security.SamlUserDetailsAuthenticationProvider"/>
+  <!-- SAML Authentication Provider responsible for validating of received SAML messages -->
+  <bean id="samlAuthenticationProvider" class="org.springframework.security.saml.SAMLAuthenticationProvider">
+    <!-- OPTIONAL property: can be used to store/load user data after login -->
+    <property name="userDetails" ref="samlUserDetailService" />
+    <property name="forcePrincipalAsString" value="false" />
+  </bean>
+
+  <security:authentication-manager  id="authenticationManager" alias="authenticationManager">
+    <security:authentication-provider ref="userDetailService"/>
+    <security:authentication-provider ref="samlAuthenticationProvider"/>
+  </security:authentication-manager>
+
+  <!-- Provider of default SAML Context -->
+  <bean id="contextProviderManabiTeacher" class="org.springframework.security.saml.context.SAMLContextProviderLB">
+    <property name="scheme" value="${sp.scheme}"/>
+    <property name="serverName" value="${sp.serverName}"/>
+    <property name="serverPort" value="${sp.serverPort}"/>
+    <property name="includeServerPortInRequestURL" value="${sp.includeServerPortInRequestURL}"/>
+    <property name="contextPath" value="${sp.admin.contextPath}"/>
+    <property name="metadata" ref="metadata" />
+    <property name="metadataResolver">
+      <bean class="org.springframework.security.saml.trust.MetadataCredentialResolver">
+        <constructor-arg index="0" ref="metadata"/>
+        <constructor-arg index="1" ref="keyManagerManabiTeacher"/>
+        <property name="useXmlMetadata" value="true"/>
+      </bean>
+    </property>
+    <property name="pkixTrustEvaluator">
+      <bean class="org.springframework.security.saml.trust.CertPathPKIXTrustEvaluator">
+        <property name="PKIXValidationOptions">
+          <bean class="org.opensaml.xml.security.x509.CertPathPKIXValidationOptions">
+            <property name="forceRevocationEnabled" value="false"/>
+            <property name="revocationEnabled" value="false"/>
+          </bean>
+        </property>
+        <property name="validateCertPath" value="false"/>
+        <property name="securityProvider" value="SUN"/>
+      </bean>
+    </property>
+    <property name="storageFactory">
+      <bean class="org.springframework.security.saml.storage.EmptyStorageFactory"/>
+    </property>
+    <property name="keyManager" ref="keyManagerManabiTeacher"/>
+  </bean>
+
+  <bean id="contextProviderManabiStudent" class="org.springframework.security.saml.context.SAMLContextProviderLB">
+    <property name="scheme" value="${sp.scheme}"/>
+    <property name="serverName" value="${sp.serverName}"/>
+    <property name="serverPort" value="${sp.serverPort}"/>
+    <property name="includeServerPortInRequestURL" value="${sp.includeServerPortInRequestURL}"/>
+    <property name="contextPath" value="${sp.portal.contextPath}"/>
+    <property name="metadata" ref="metadataManabiStudent" />
+    <property name="metadataResolver">
+      <bean class="org.springframework.security.saml.trust.MetadataCredentialResolver">
+        <constructor-arg index="0" ref="metadataManabiStudent"/>
+        <constructor-arg index="1" ref="keyManagerManabiStudent"/>
+        <property name="useXmlMetadata" value="true"/>
+      </bean>
+    </property>
+    <property name="pkixTrustEvaluator">
+      <bean class="org.springframework.security.saml.trust.CertPathPKIXTrustEvaluator">
+        <property name="PKIXValidationOptions">
+          <bean class="org.opensaml.xml.security.x509.CertPathPKIXValidationOptions">
+            <property name="forceRevocationEnabled" value="false"/>
+            <property name="revocationEnabled" value="false"/>
+          </bean>
+        </property>
+        <property name="validateCertPath" value="false"/>
+        <property name="securityProvider" value="SUN"/>
+      </bean>
+    </property>
+    <property name="storageFactory">
+      <bean class="org.springframework.security.saml.storage.EmptyStorageFactory"/>
+    </property>
+    <property name="keyManager" ref="keyManagerManabiStudent"/>
+  </bean>
+
+  <bean id="contextProviderSuiteTeacher" class="org.springframework.security.saml.context.SAMLContextProviderLB">
+    <property name="scheme" value="${sp.scheme}"/>
+    <property name="serverName" value="${sp.serverName}"/>
+    <property name="serverPort" value="${sp.serverPort}"/>
+    <property name="includeServerPortInRequestURL" value="${sp.includeServerPortInRequestURL}"/>
+    <property name="contextPath" value="${sp.admin.contextPath}"/>
+    <property name="metadata" ref="metadataSuiteTeacher" />
+    <property name="metadataResolver">
+      <bean class="org.springframework.security.saml.trust.MetadataCredentialResolver">
+        <constructor-arg index="0" ref="metadataSuiteTeacher"/>
+        <constructor-arg index="1" ref="keyManagerSuiteTeacher"/>
+        <property name="useXmlMetadata" value="true"/>
+      </bean>
+    </property>
+    <property name="pkixTrustEvaluator">
+      <bean class="org.springframework.security.saml.trust.CertPathPKIXTrustEvaluator">
+        <property name="PKIXValidationOptions">
+          <bean class="org.opensaml.xml.security.x509.CertPathPKIXValidationOptions">
+            <property name="forceRevocationEnabled" value="false"/>
+            <property name="revocationEnabled" value="false"/>
+          </bean>
+        </property>
+        <property name="validateCertPath" value="false"/>
+        <property name="securityProvider" value="SUN"/>
+      </bean>
+    </property>
+    <property name="storageFactory">
+      <bean class="org.springframework.security.saml.storage.EmptyStorageFactory"/>
+    </property>
+    <property name="keyManager" ref="keyManagerSuiteTeacher"/>
+  </bean>
+  <bean id="contextProviderSuiteStudent" class="org.springframework.security.saml.context.SAMLContextProviderLB">
+    <property name="scheme" value="${sp.scheme}"/>
+    <property name="serverName" value="${sp.serverName}"/>
+    <property name="serverPort" value="${sp.serverPort}"/>
+    <property name="includeServerPortInRequestURL" value="${sp.includeServerPortInRequestURL}"/>
+    <property name="contextPath" value="${sp.portal.contextPath}"/>
+    <property name="metadata" ref="metadataSuiteStudent" />
+    <property name="metadataResolver">
+      <bean class="org.springframework.security.saml.trust.MetadataCredentialResolver">
+        <constructor-arg index="0" ref="metadataSuiteStudent"/>
+        <constructor-arg index="1" ref="keyManagerSuiteStudent"/>
+        <property name="useXmlMetadata" value="true"/>
+      </bean>
+    </property>
+    <property name="pkixTrustEvaluator">
+      <bean class="org.springframework.security.saml.trust.CertPathPKIXTrustEvaluator">
+        <property name="PKIXValidationOptions">
+          <bean class="org.opensaml.xml.security.x509.CertPathPKIXValidationOptions">
+            <property name="forceRevocationEnabled" value="false"/>
+            <property name="revocationEnabled" value="false"/>
+          </bean>
+        </property>
+        <property name="validateCertPath" value="false"/>
+        <property name="securityProvider" value="SUN"/>
+      </bean>
+    </property>
+    <property name="storageFactory">
+      <bean class="org.springframework.security.saml.storage.EmptyStorageFactory"/>
+    </property>
+    <property name="keyManager" ref="keyManagerSuiteStudent"/>
+  </bean>
+
+  <!-- Class loading incoming SAML messages from httpRequest stream -->
+  <bean id="processor" class="org.springframework.security.saml.processor.SAMLProcessorImpl">
+    <constructor-arg>
+      <list>
+        <ref bean="redirectBinding"/>
+        <ref bean="postBinding"/>
+        <ref bean="artifactBinding"/>
+        <ref bean="soapBinding"/>
+        <ref bean="paosBinding"/>
+      </list>
+    </constructor-arg>
+  </bean>
+
+  <!-- Bindings, encoders and decoders used for creating and parsing messages -->
+  <bean id="postBinding" class="org.springframework.security.saml.processor.HTTPPostBinding">
+    <constructor-arg ref="parserPool"/>
+    <constructor-arg ref="velocityEngine"/>
+  </bean>
+
+  <bean id="redirectBinding" class="org.springframework.security.saml.processor.HTTPRedirectDeflateBinding">
+    <constructor-arg ref="parserPool"/>
+  </bean>
+
+  <bean id="artifactBinding" class="org.springframework.security.saml.processor.HTTPArtifactBinding">
+    <constructor-arg ref="parserPool"/>
+    <constructor-arg ref="velocityEngine"/>
+    <constructor-arg>
+      <bean class="org.springframework.security.saml.websso.ArtifactResolutionProfileImpl">
+        <constructor-arg>
+          <bean class="org.apache.commons.httpclient.HttpClient">
+            <constructor-arg>
+              <bean class="org.apache.commons.httpclient.MultiThreadedHttpConnectionManager"/>
+            </constructor-arg>
+          </bean>
+        </constructor-arg>
+        <property name="processor">
+          <bean class="org.springframework.security.saml.processor.SAMLProcessorImpl">
+            <constructor-arg ref="soapBinding"/>
+          </bean>
+        </property>
+      </bean>
+    </constructor-arg>
+  </bean>
+
+  <bean id="soapBinding" class="org.springframework.security.saml.processor.HTTPSOAP11Binding">
+    <constructor-arg ref="parserPool"/>
+  </bean>
+
+  <bean id="paosBinding" class="org.springframework.security.saml.processor.HTTPPAOS11Binding">
+    <constructor-arg ref="parserPool"/>
+  </bean>
+
+<!--  <bean name="WebSecurityConfig" class="jp.co.toppan.nv.shared.web.security.WebSecurityConfig" />-->
+</beans>

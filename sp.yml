@@ -1,0 +1,186 @@
+sp:
+  scheme: https
+  serverName: dev.navima.jp
+  serverPort: 443
+  includeServerPortInRequestURL: true
+  admin:
+    contextPath: /admin
+    entityBaseURL: ${sp.scheme}://${sp.serverName}:${sp.serverPort}${sp.admin.contextPath}
+  portal:
+    contextPath: /portal
+    entityBaseURL: ${sp.scheme}://${sp.serverName}:${sp.serverPort}${sp.portal.contextPath}
+  manabi:
+    teacher:
+      entityId: https://www.navima.jp/svc1/teacher/shibboleth-sp
+      alias: manabiTeacher
+    student:
+      entityId: https://www.navima.jp/svc1/student/shibboleth-sp
+      alias: manabiStudent
+    idpSelectionPath: https://ds.stg-ed-cl.com/discovery/WAYF
+    signingKey: key
+    admin:
+      idpDiscoveryResponseURL: ${sp.admin.entityBaseURL}/saml/login/alias/${sp.manabi.teacher.alias}
+    portal:
+      idpDiscoveryResponseURL: ${sp.portal.entityBaseURL}/saml/login/alias/${sp.manabi.student.alias}
+    jks:
+      key: key
+      pass: 123456
+    metadataTrustCheck: true
+    tls: manabi
+    keyValue: gakunin
+    requestSigned: true
+    idpDiscoveryEnabled: true
+  ope:
+    teacher:
+      entityId: https://www.navima.jp/svc1/teacher/shibboleth-sp
+      alias: opeTeacher
+    student:
+      entityId: https://www.navima.jp/svc1/student/shibboleth-sp
+      alias: opeStudent
+    idpSelectionPath: https://pt-ds.opesystem.com/discovery/WAYF
+    signingKey: prvkey
+    admin:
+      idpDiscoveryResponseURL: ${sp.admin.entityBaseURL}/saml/login/alias/${sp.ope.teacher.alias}
+    portal:
+      idpDiscoveryResponseURL: ${sp.portal.entityBaseURL}/saml/login/alias/${sp.ope.student.alias}
+    jks:
+      key: prvkey
+      pass: 123456
+    metadataTrustCheck: true
+    tls: ope
+    keyValue: dskey
+    requestSigned: true
+    idpDiscoveryEnabled: true
+  suite:
+    teacher:
+      entityId: https://www.navima.jp/svc1/teacher/shibboleth-sp
+      C01l1vkh7: suiteTeacher
+      C03vpxicb: suiteLgateTeacher
+      C00y5vesz: suiteNomiTeacher
+      C019aohyx: suiteMunakataTeacher
+      C00txblef: suiteFukutsuTeacher
+      C00xic24l: suiteChitaTeacher
+    student:
+      entityId: https://www.navima.jp/svc1/student/shibboleth-sp
+      C01l1vkh7: suiteStudent
+      C03vpxicb: suiteLgateStudent
+      C00y5vesz: suiteNomiStudent
+      C019aohyx: suiteMunakataStudent
+      C00txblef: suiteFukutsuStudent
+      C00xic24l: suiteChitaStudent
+    signingKey: key
+    jks:
+      key: key
+      pass: 123456
+    metadataTrustCheck: true
+    tls: suite
+    keyValue: suite
+    requestSigned: false
+    idpDiscoveryEnabled: false
+  azure:
+    student:
+      entityId: https://www.navima.jp/svc1/student/shibboleth-sp
+      entryPointId: azureStudent
+      azureYodoJHSStudent: azureYodoJHSStudent
+      Basis: azureBasisStudent
+      TestID: azureLgateStudent
+    teacher:
+      entityId: https://www.navima.jp/svc1/teacher/shibboleth-sp
+      entryPointId: azureTeacher
+      Basis: azureBasisTeacher
+      TestID: azureLgateTeacher
+    signingKey: key
+    jks:
+      key: key
+      pass: 123456
+    metadataTrustCheck: true
+    tls: azure
+    keyValue: azure
+    requestSigned: false
+    idpDiscoveryEnabled: false
+  includeDiscoveryExtension: true
+  wantAssertionSigned: true
+  signMetadata: false
+
+idp:
+  tls:
+    jks:
+      key: key
+      pass: 123456
+      keystore: tlsKeyStore.jks
+  manabi:
+    discoveryURL: https://ds.stg-ed-cl.com/discovery/WAYF
+    metadataURL: https://ds.stg-ed-cl.com/repo/idp-metadata-signed.xml
+    admin:
+      idpDiscoveryURL: ${idp.manabi.discoveryURL}?return=${sp.admin.entityBaseURL}/saml/login/alias/${sp.manabi.teacher.alias}
+    portal:
+      idpDiscoveryURL: ${idp.manabi.discoveryURL}?return=${sp.portal.entityBaseURL}/saml/login/alias/${sp.manabi.student.alias}
+  ope:
+    discoveryURL: https://pt-ds.opesystem.com/discovery/WAYF
+    metadataURL: https://pt-ds.opesystem.com/metadata/sandbox-metadata-toppan-xxe.xml
+    admin:
+      idpDiscoveryURL: ${idp.ope.discoveryURL}?return=${sp.admin.entityBaseURL}/saml/login/alias/${sp.ope.teacher.alias}
+    portal:
+      idpDiscoveryURL: ${idp.ope.discoveryURL}?return=${sp.portal.entityBaseURL}/saml/login/alias/${sp.ope.student.alias}
+  suite:
+    C01l1vkh7:
+      admin:
+        entityId: https://accounts.google.com/o/saml2?idpid=C01l1vkh7
+        discoveryURL: https://accounts.google.com/o/saml2/idp?idpid=C01l1vkh7
+      portal:
+        entityId: https://accounts.google.com/o/saml2?idpid=C01l1vkh7
+        discoveryURL: https://accounts.google.com/o/saml2/idp?idpid=C01l1vkh7
+    C03vpxicb:
+      admin:
+        entityId: https://accounts.google.com/o/saml2?idpid=C03vpxicb
+        discoveryURL: https://accounts.google.com/o/saml2/idp?idpid=C03vpxicb
+      portal:
+        entityId: https://accounts.google.com/o/saml2?idpid=C03vpxicb
+        discoveryURL: https://accounts.google.com/o/saml2/idp?idpid=C03vpxicb
+    C00y5vesz:
+      admin:
+        entityId: https://accounts.google.com/o/saml2?idpid=C00y5vesz
+        discoveryURL: https://accounts.google.com/o/saml2/idp?idpid=C00y5vesz
+      portal:
+        entityId: https://accounts.google.com/o/saml2?idpid=C00y5vesz
+        discoveryURL: https://accounts.google.com/o/saml2/idp?idpid=C00y5vesz
+    C019aohyx:
+      admin:
+        entityId: https://accounts.google.com/o/saml2?idpid=C019aohyx
+        discoveryURL: https://accounts.google.com/o/saml2/idp?idpid=C019aohyx
+      portal:
+        entityId: https://accounts.google.com/o/saml2?idpid=C019aohyx
+        discoveryURL: https://accounts.google.com/o/saml2/idp?idpid=C019aohyx
+    C00txblef:
+      admin:
+        entityId: https://accounts.google.com/o/saml2?idpid=C00txblef
+        discoveryURL: https://accounts.google.com/o/saml2/idp?idpid=C00txblef
+      portal:
+        entityId: https://accounts.google.com/o/saml2?idpid=C00txblef
+        discoveryURL: https://accounts.google.com/o/saml2/idp?idpid=C00txblef
+    C00xic24l:
+      admin:
+        entityId: https://accounts.google.com/o/saml2?idpid=C00xic24l
+        discoveryURL: https://accounts.google.com/o/saml2/idp?idpid=C00xic24l
+      portal:
+        entityId: https://accounts.google.com/o/saml2?idpid=C00xic24l
+        discoveryURL: https://accounts.google.com/o/saml2/idp?idpid=C00xic24l
+  azure:
+    azureYodoJHSStudent:
+      portal:
+        entityId: https://sts.windows.net//4e01f52c-d880-45cd-a567-dc9cec4a4287/
+        discoveryURL: https://sts.windows.net//4e01f52c-d880-45cd-a567-dc9cec4a4287/
+    Basis:
+      portal:
+        entityId: https://sts.windows.net//4e01f52c-d880-45cd-a567-dc9cec4a4287/
+        discoveryURL: https://sts.windows.net//4e01f52c-d880-45cd-a567-dc9cec4a4287/
+      admin:
+        entityId: https://sts.windows.net//4e01f52c-d880-45cd-a567-dc9cec4a4287/
+        discoveryURL: https://sts.windows.net//4e01f52c-d880-45cd-a567-dc9cec4a4287/
+    TestID:
+      portal:
+        entityId: https://sts.windows.net/test-tenant-ID
+        discoveryURL: https://sts.windows.net/test-tenant-ID
+      admin:
+        entityId: https://sts.windows.net/test-tenant-ID
+        discoveryURL: https://sts.windows.net/test-tenant-ID
